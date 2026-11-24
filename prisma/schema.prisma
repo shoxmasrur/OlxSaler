@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProductStatus {
+  IMPORTED
+  IMAGES_FOUND
+  DRAFT_READY
+  APPROVED
+  POSTING
+  POSTED
+  FAILED
+  SKIPPED
+}
+
+enum ImageSource {
+  SEARCH
+  USER
+}
+
+enum JobType {
+  POST
+  UPDATE_PRICE
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model PriceList {
+  id             Int       @id @default(autoincrement())
+  fileName       String
+  telegramFileId String?
+  rowCount       Int       @default(0)
+  errorCount     Int       @default(0)
+  createdAt      DateTime  @default(now())
+  products       Product[]
+}
+
+model Product {
+  id          Int            @id @default(autoincrement())
+  priceListId Int
+  priceList   PriceList      @relation(fields: [priceListId], references: [id])
+  model       String
+  price       Int
+  currency    String
+  condition   String
+  quantity    Int            @default(1)
+  category    String?
+  note        String?
+  status      ProductStatus  @default(IMPORTED)
+  createdAt   DateTime       @default(now())
+  images      ProductImage[]
+  listing     Listing?
+  jobs        Job[]
+
+  @@index([status])
+}
+
+model ProductImage {
+  id             Int         @id @default(autoincrement())
+  productId      Int
+  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sourceUrl      String?
+  localPath      String?
+  width          Int?
+  height         Int?
+  source         ImageSource
+  selected       Boolean     @default(false)
+  rejectedReason String?
+
+  @@index([productId])
+}
+
+model Listing {
+  id          Int       @id @default(autoincrement())
+  productId   Int       @unique
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  olxCategory String
+  olxAdId     String?
+  olxUrl      String?
+  postedPrice Int?
+  postedAt    DateTime?
+}
+
+model Job {
+  id             Int      @id @default(autoincrement())
+  type           JobType
+  productId      Int
+  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  status         String   @default("PENDING")
+  attempts       Int      @default(0)
+  lastError      String?
+  screenshotPath String?
+  createdAt      DateTime @default(now())
+}
+
+model EventLog {
+  id         Int      @id @default(autoincrement())
+  type       String
+  entityType String?
+  entityId   Int?
+  payload    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([type])
+}
