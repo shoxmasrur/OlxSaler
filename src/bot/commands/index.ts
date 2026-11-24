@@ -1,12 +1,15 @@
 import type { Bot } from 'grammy';
-import { InlineKeyboard } from 'grammy';
+import { InlineKeyboard, InputFile } from 'grammy';
+import { buildTemplate } from '../../services/priceList/template.js';
 
 const soon = 'Tez orada...';
 
 export function registerCommands(bot: Bot) {
   bot.command('start', (ctx) => ctx.reply('Salom! Narxlar jadvalini yuboring.'));
   bot.command('help', (ctx) => ctx.reply(soon));
-  bot.command('template', (ctx) => ctx.reply(soon));
+  bot.command('template', async (ctx) =>
+    ctx.replyWithDocument(new InputFile(await buildTemplate(), 'template.xlsx')),
+  );
   bot.command('status', (ctx) => ctx.reply(soon));
   bot.command('list', (ctx) => ctx.reply(soon));
   bot.command('pause', (ctx) => ctx.reply(soon));

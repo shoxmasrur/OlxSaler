@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../config/env.js', () => ({ env: { BOT_TOKEN: 'test' } }));
+vi.mock('../../services/priceList/import.js', () => ({}));
 
 const { detectKind } = await import('./files.js');
 const { parseCallback } = await import('./callbacks.js');

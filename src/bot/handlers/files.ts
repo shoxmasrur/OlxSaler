@@ -4,6 +4,8 @@ import type { Bot, Context } from 'grammy';
 import { fileTypeFromBuffer } from 'file-type';
 import { env } from '../../config/env.js';
 import { logger } from '../../lib/logger.js';
+import { parseCsvBuffer, parseXlsx } from '../../services/priceList/parse.js';
+import { formatSummary, importPriceList } from '../../services/priceList/import.js';
 
 const UPLOADS = path.resolve('storage/uploads');
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -48,11 +50,16 @@ export function registerFileHandlers(bot: Bot) {
         return void (await ctx.reply('Rasm qabul qilindi.'));
       }
       if (!extOk) {
-        return void (await ctx.reply("Fayl rad etildi: faqat haqiqiy .xlsx yoki .csv qabul qilinadi."));
+        return void (await ctx.reply(
+          'Fayl rad etildi: faqat haqiqiy .xlsx yoki .csv qabul qilinadi.',
+        ));
       }
       const target = await save(UPLOADS, name, buf);
       logger.info({ target }, 'Jadval saqlandi');
-      await ctx.reply('Jadval qabul qilindi. (Import 4-bosqichda ulanadi.)');
+
+      const result = kind === 'xlsx' ? await parseXlsx(buf) : parseCsvBuffer(buf);
+      const summary = await importPriceList(doc.file_name ?? name, doc.file_id, result);
+      await ctx.reply(formatSummary(summary));
     } catch (err) {
       logger.error({ err }, 'Fayl qabul qilishda xato');
       await ctx.reply('Faylni qabul qilishda xato.');
