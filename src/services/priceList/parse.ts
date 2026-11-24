@@ -44,7 +44,11 @@ const HEADER_ALIASES: Record<string, string> = {
 };
 
 const normalizeHeader = (h: string) => h.toLowerCase().replace(/[^\p{L}]/gu, '');
-const normalizeWord = (s: string) => s.toLowerCase().replace(/[ʻʼ’‘`´]/g, "'").trim();
+const normalizeWord = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[ʻʼ’‘`´]/g, "'")
+    .trim();
 
 /** "1 250 000", "1,250,000", "1250000 so'm" -> 1250000. Raqam topilmasa NaN. */
 export function cleanPrice(value: string): number {
