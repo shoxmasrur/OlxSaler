@@ -10,7 +10,7 @@ const schema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1),
   ANTHROPIC_MODEL: z.string().min(1),
   BRAVE_API_KEY: z.string().min(1),
-  SENTRY_DSN: z.string().url().optional(),
+  SENTRY_DSN: z.preprocess((v) => (v === '' ? undefined : v), z.string().url().optional()),
 });
 
 const parsed = schema.safeParse(process.env);
