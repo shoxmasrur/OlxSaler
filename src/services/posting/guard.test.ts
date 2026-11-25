@@ -52,10 +52,10 @@ describe('evaluateGuard', () => {
   });
 
   it('oxirgi e`londan keyin tanaffus tugamaguncha kutadi va qachon bo`lishini aytadi', () => {
-    const last = new Date(noon.getTime() - 10 * 60_000);
+    const last = new Date(noon.getTime() - 5 * 60_000);
     const res = evaluateGuard({ ...base, lastPostedAt: last });
     expect(res).toMatchObject({ allowed: false, reason: 'too_soon' });
-    if (!res.allowed) expect(res.retryAfter?.getTime()).toBe(last.getTime() + 20 * 60_000);
+    if (!res.allowed) expect(res.retryAfter?.getTime()).toBe(last.getTime() + 10 * 60_000);
   });
 
   it('tanlangan tasodifiy tanaffus ishlatiladi', () => {
@@ -68,13 +68,20 @@ describe('evaluateGuard', () => {
 });
 
 describe('randomGapMs', () => {
+  const range = { ...DEFAULT_GUARD, minGapMin: 20, maxGapMin: 60 };
+
   it('doim [minGapMin, maxGapMin] oralig`ida', () => {
-    expect(randomGapMs(DEFAULT_GUARD, () => 0)).toBe(20 * 60_000);
-    expect(randomGapMs(DEFAULT_GUARD, () => 1)).toBe(60 * 60_000);
+    expect(randomGapMs(range, () => 0)).toBe(20 * 60_000);
+    expect(randomGapMs(range, () => 1)).toBe(60 * 60_000);
     for (let i = 0; i < 50; i++) {
-      const ms = randomGapMs(DEFAULT_GUARD);
+      const ms = randomGapMs(range);
       expect(ms).toBeGreaterThanOrEqual(20 * 60_000);
       expect(ms).toBeLessThanOrEqual(60 * 60_000);
     }
+  });
+
+  it("standart sozlama: qat'iy 10 daqiqa, kuniga 30 ta", () => {
+    expect(randomGapMs(DEFAULT_GUARD)).toBe(10 * 60_000);
+    expect(DEFAULT_GUARD.dailyLimit).toBe(30);
   });
 });

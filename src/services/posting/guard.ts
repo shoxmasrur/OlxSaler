@@ -14,12 +14,13 @@ export interface GuardConfig {
   timeZone: string;
 }
 
+// Egasining qarori (2026-11-25): kuniga 30 tagacha, har 10 daqiqada bittadan (qat'iy interval).
 export const DEFAULT_GUARD: GuardConfig = {
-  dailyLimit: 5,
+  dailyLimit: 30,
   startHour: 9,
   endHour: 20,
-  minGapMin: 20,
-  maxGapMin: 60,
+  minGapMin: 10,
+  maxGapMin: 10,
   timeZone: 'Asia/Tashkent',
 };
 

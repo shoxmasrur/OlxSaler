@@ -4,6 +4,7 @@ import { buildCatalogTemplate } from '../../services/priceList/template.js';
 import { registerControlCommands } from './control.js';
 import { registerDraftCommand } from './draft.js';
 import { registerImageCommand } from './images.js';
+import { registerPrepareCommand } from './prepare.js';
 import { registerReviewCommand } from './review.js';
 
 const soon = 'Tez orada...';
@@ -19,6 +20,7 @@ export function registerCommands(bot: Bot) {
   registerImageCommand(bot);
   registerReviewCommand(bot);
   registerDraftCommand(bot);
+  registerPrepareCommand(bot);
 }
 
 export async function setupMenu(bot: Bot) {
@@ -29,6 +31,7 @@ export async function setupMenu(bot: Bot) {
     { command: 'images', description: 'Mahsulotlarga rasm topish' },
     { command: 'review', description: 'Rasmlarni tasdiqlash' },
     { command: 'draft', description: "E'lon qoralamasi va yakuniy tasdiq" },
+    { command: 'prepare', description: 'Mahsulotlarni navbatga tayyorlash' },
     { command: 'status', description: 'Holat' },
     { command: 'list', description: "Oxirgi e'lonlar" },
     { command: 'pause', description: "Joylashni to'xtatish" },
