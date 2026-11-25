@@ -1,6 +1,7 @@
 import type { Bot } from 'grammy';
 import { InlineKeyboard, InputFile } from 'grammy';
 import { buildTemplate } from '../../services/priceList/template.js';
+import { registerImageCommand } from './images.js';
 
 const soon = 'Tez orada...';
 
@@ -14,6 +15,7 @@ export function registerCommands(bot: Bot) {
   bot.command('list', (ctx) => ctx.reply(soon));
   bot.command('pause', (ctx) => ctx.reply(soon));
   bot.command('resume', (ctx) => ctx.reply(soon));
+  registerImageCommand(bot);
 
   // Qadam 3.4 sinovi uchun vaqtinchalik buyruq (6.5-qadamda preview bilan almashadi).
   bot.command('buttons', (ctx) =>
@@ -28,6 +30,7 @@ export async function setupMenu(bot: Bot) {
     { command: 'start', description: 'Botni boshlash' },
     { command: 'help', description: 'Yordam' },
     { command: 'template', description: 'Namuna Excel shablon' },
+    { command: 'images', description: 'Mahsulotlarga rasm topish' },
     { command: 'status', description: 'Holat' },
     { command: 'list', description: "Oxirgi e'lonlar" },
     { command: 'pause', description: "Workerni to'xtatish" },
