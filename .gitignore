@@ -4,3 +4,7 @@ dist/
 browser-profile/
 storage/
 *.log
+# Narxnoma va katalog fayllarida tan narx/foyda bor, git'ga tushmasin
+*.xlsx
+*.csv
+*.pdf

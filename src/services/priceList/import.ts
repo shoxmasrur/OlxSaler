@@ -29,6 +29,9 @@ export async function importPriceList(
       await tx.product.createMany({
         data: rows.map((r) => ({
           priceListId: list.id,
+          code: r.code,
+          title: r.title,
+          description: r.description,
           model: r.model,
           price: Math.round(r.price),
           currency: r.currency,

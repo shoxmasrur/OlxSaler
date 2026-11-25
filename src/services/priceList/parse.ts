@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { z } from 'zod';
+import { readCatalog, type CatalogRead } from './catalog.js';
 
 export type RawRow = Record<string, string>;
 
@@ -12,6 +13,9 @@ export interface ProductRow {
   quantity: number;
   category?: string;
   note?: string;
+  code?: string;
+  title?: string;
+  description?: string;
 }
 
 export interface RowError {
@@ -101,6 +105,9 @@ const rowSchema = z.object({
     ),
   category: z.string().trim().optional(),
   note: z.string().trim().optional(),
+  code: z.string().trim().optional(),
+  title: z.string().trim().optional(),
+  description: z.string().trim().optional(),
 });
 
 /** Bo'sh qatorlar tashlab yuboriladi. Xatolar qator raqami bilan yig'iladi (FR-5). */
@@ -118,10 +125,20 @@ export function validateRows(raw: { row: number; data: RawRow }[]): ParseResult 
       quantity: data.quantity ?? '',
       category: data.category || undefined,
       note: data.note || undefined,
+      code: data.code || undefined,
+      title: data.title || undefined,
+      description: data.description || undefined,
     });
     if (parsed.success) {
-      const { category, note, ...rest } = parsed.data;
-      rows.push({ ...rest, ...(category ? { category } : {}), ...(note ? { note } : {}) });
+      const { category, note, code, title, description, ...rest } = parsed.data;
+      rows.push({
+        ...rest,
+        ...(category ? { category } : {}),
+        ...(note ? { note } : {}),
+        ...(code ? { code } : {}),
+        ...(title ? { title } : {}),
+        ...(description ? { description } : {}),
+      });
     } else {
       errors.push({ row, message: parsed.error.issues.map((i) => i.message).join(', ') });
     }
@@ -162,7 +179,17 @@ export async function parseXlsx(buf: Buffer): Promise<ParseResult> {
   const sheet = wb.worksheets[0];
   if (!sheet) return { rows: [], errors: [{ row: 1, message: "jadval bo'sh" }] };
 
-  // Qator raqamlari saqlanishi uchun 1-qatordan oxirgigacha hammasi o'qiladi.
+  // Katalog formati (ko'p varaqli, "E'lon sarlavhasi" ustuni bor) avval tekshiriladi.
+  const catalog = readCatalog(
+    wb.worksheets.map((ws) => ({ name: ws.name, table: sheetToTable(ws) })),
+  );
+  if (catalog) return validateCatalog(catalog);
+
+  return validateRows(toRawRows(sheetToTable(sheet)));
+}
+
+// Qator raqamlari saqlanishi uchun 1-qatordan oxirgigacha hammasi o'qiladi.
+function sheetToTable(sheet: ExcelJS.Worksheet): string[][] {
   const table: string[][] = [];
   for (let r = 1; r <= sheet.rowCount; r++) {
     const row = sheet.getRow(r);
@@ -170,7 +197,24 @@ export async function parseXlsx(buf: Buffer): Promise<ParseResult> {
     for (let c = 1; c <= sheet.columnCount; c++) cells.push(cellToString(row.getCell(c).value));
     table.push(cells);
   }
-  return validateRows(toRawRows(table));
+  return table;
+}
+
+/** Varaqlar bo'yicha tekshiriladi; xato matniga varaq nomi qo'shiladi (qator raqamlari varaqda takrorlanadi). */
+function validateCatalog(catalog: CatalogRead): ParseResult {
+  const rows: ProductRow[] = [];
+  const errors: RowError[] = catalog.errors.map((e) => ({
+    row: e.row,
+    message: `[${e.sheet}] ${e.message}`,
+  }));
+  for (const sheet of catalog.sheets) {
+    const res = validateRows(sheet.rows);
+    rows.push(...res.rows);
+    errors.push(
+      ...res.errors.map((e) => ({ row: e.row, message: `[${sheet.name}] ${e.message}` })),
+    );
+  }
+  return { rows, errors };
 }
 
 export function parseCsvBuffer(buf: Buffer): ParseResult {
