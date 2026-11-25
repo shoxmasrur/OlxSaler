@@ -1,10 +1,14 @@
 import { prisma } from '../../db/client.js';
 import { logEvent } from '../eventLog.js';
+import { splitNew } from './dedupe.js';
 import type { ParseResult } from './parse.js';
 
 export interface ImportSummary {
-  priceListId: number;
+  /** Hammasi oldin yuklangan bo'lsa, yangi ro'yxat yaratilmaydi. */
+  priceListId: number | null;
   imported: number;
+  /** Bazada allaqachon bor mahsulotlar (qayta yuborilgan fayl). */
+  skipped: number;
   errors: ParseResult['errors'];
 }
 
@@ -16,18 +20,29 @@ export async function importPriceList(
 ): Promise<ImportSummary> {
   const { rows, errors } = result;
 
-  const priceList = await prisma.$transaction(async (tx) => {
+  const outcome = await prisma.$transaction(async (tx) => {
+    // Kod bo'yicha (kodsizlar uchun model bo'yicha) bazada bor mahsulotlar qayta qo'shilmaydi.
+    const codes = rows.flatMap((r) => (r.code ? [r.code] : []));
+    const models = rows.flatMap((r) => (r.code ? [] : [r.model]));
+    const existing = await tx.product.findMany({
+      where: { OR: [{ code: { in: codes } }, { code: null, model: { in: models } }] },
+      select: { code: true, model: true, category: true },
+    });
+    const { fresh, skipped } = splitNew(rows, existing);
+
+    if (rows.length > 0 && fresh.length === 0) return { list: null, fresh, skipped };
+
     const list = await tx.priceList.create({
       data: {
         fileName,
         telegramFileId,
-        rowCount: rows.length,
+        rowCount: fresh.length,
         errorCount: errors.length,
       },
     });
-    if (rows.length > 0) {
+    if (fresh.length > 0) {
       await tx.product.createMany({
-        data: rows.map((r) => ({
+        data: fresh.map((r) => ({
           priceListId: list.id,
           code: r.code,
           title: r.title,
@@ -43,20 +58,29 @@ export async function importPriceList(
         })),
       });
     }
-    return list;
+    return { list, fresh, skipped };
   });
 
-  await logEvent('PRICELIST_IMPORTED', 'PriceList', priceList.id, {
+  await logEvent('PRICELIST_IMPORTED', 'PriceList', outcome.list?.id, {
     fileName,
-    imported: rows.length,
+    imported: outcome.fresh.length,
+    skipped: outcome.skipped,
     errors: errors.length,
   });
 
-  return { priceListId: priceList.id, imported: rows.length, errors };
+  return {
+    priceListId: outcome.list?.id ?? null,
+    imported: outcome.fresh.length,
+    skipped: outcome.skipped,
+    errors,
+  };
 }
 
 export function formatSummary(s: ImportSummary): string {
   const lines = [`${s.imported} ta mahsulot qabul qilindi.`];
+  if (s.skipped > 0) {
+    lines.push(`${s.skipped} ta mahsulot oldin yuklangan, o'tkazib yuborildi.`);
+  }
   if (s.errors.length > 0) {
     const shown = s.errors.slice(0, 20).map((e) => `${e.row}-qator — ${e.message}`);
     const more = s.errors.length > 20 ? `\n...va yana ${s.errors.length - 20} ta` : '';
