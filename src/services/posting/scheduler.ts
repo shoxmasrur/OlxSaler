@@ -3,7 +3,10 @@ import type { GuardResult } from './guard.js';
 export type WorkerAction = 'post' | 'ask' | 'idle';
 
 export interface SchedulerInput {
+  /** Joylash uchun qoidalar. */
   guard: GuardResult;
+  /** Tasdiq so'rash uchun qoidalar (tanaffus biroz qisqaroq: ASK_LEAD_MS). Berilmasa `guard`. */
+  askGuard?: GuardResult;
   hasRunning: boolean;
   hasConfirmed: boolean;
   /** Egasidan tasdiq so'ralgan, javob kutilmoqda. */
@@ -22,9 +25,10 @@ export interface SchedulerInput {
  */
 export function decideAction(i: SchedulerInput): WorkerAction {
   if (i.hasRunning) return 'idle';
-  if (!i.guard.allowed) return 'idle';
-  if (i.hasConfirmed) return 'post';
+  if (i.hasConfirmed) return i.guard.allowed ? 'post' : 'idle';
   if (i.hasAsked) return 'idle';
-  if (i.hasPending && (i.askNotBefore === null || i.now >= i.askNotBefore)) return 'ask';
+  const askAllowed = (i.askGuard ?? i.guard).allowed;
+  if (askAllowed && i.hasPending && (i.askNotBefore === null || i.now >= i.askNotBefore))
+    return 'ask';
   return 'idle';
 }

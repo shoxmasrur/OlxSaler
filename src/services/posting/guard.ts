@@ -14,15 +14,22 @@ export interface GuardConfig {
   timeZone: string;
 }
 
-// Egasining qarori (2026-11-25): kuniga 30 tagacha, har 6 daqiqada bittadan (qat'iy interval).
+// Egasining qarori (2026-11-25): kuniga 30 tagacha; ikki e'lon joylanishi orasida to'ldirish va kutish
+// vaqti birgalikda kamida 10 daqiqa (qat'iy).
 export const DEFAULT_GUARD: GuardConfig = {
   dailyLimit: 30,
   startHour: 9,
   endHour: 20,
-  minGapMin: 6,
-  maxGapMin: 6,
+  minGapMin: 10,
+  maxGapMin: 10,
   timeZone: 'Asia/Tashkent',
 };
+
+/**
+ * Egasidan tasdiq so'rovi joylash vaqtidan shuncha erta yuboriladi: formani to'ldirish (~3-4 daqiqa)
+ * kutishning bir qismi bo'ladi, shunda joylashlar orasidagi jami masofa baribir minGapMin dan kam bo'lmaydi.
+ */
+export const ASK_LEAD_MS = 4 * 60_000;
 
 export interface GuardState {
   now: Date;

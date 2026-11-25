@@ -5,7 +5,12 @@ import { env } from '../config/env.js';
 import { prisma } from '../db/client.js';
 import { logger } from '../lib/logger.js';
 import { scrubSecrets } from '../lib/scrub.js';
-import { DEFAULT_GUARD, evaluateGuard, randomGapMs } from '../services/posting/guard.js';
+import {
+  ASK_LEAD_MS,
+  DEFAULT_GUARD,
+  evaluateGuard,
+  randomGapMs,
+} from '../services/posting/guard.js';
 import {
   claimConfirmedJob,
   failJob,
@@ -131,8 +136,20 @@ async function tick() {
     paused,
     requiredGapMs: gap ? Number(gap) : undefined,
   });
+  // Tasdiq so'rovi biroz erta yuboriladi: to'ldirish vaqti kutishning bir qismi bo'ladi.
+  const askGuard = evaluateGuard({
+    now,
+    postedToday: stats.postedToday,
+    lastPostedAt: stats.lastPostedAt,
+    paused,
+    requiredGapMs: Math.max(
+      (gap ? Number(gap) : DEFAULT_GUARD.minGapMin * 60_000) - ASK_LEAD_MS,
+      0,
+    ),
+  });
   const action = decideAction({
     guard,
+    askGuard,
     hasRunning,
     hasConfirmed,
     hasAsked,

@@ -52,10 +52,10 @@ describe('evaluateGuard', () => {
   });
 
   it('oxirgi e`londan keyin tanaffus tugamaguncha kutadi va qachon bo`lishini aytadi', () => {
-    const last = new Date(noon.getTime() - 3 * 60_000);
+    const last = new Date(noon.getTime() - 5 * 60_000);
     const res = evaluateGuard({ ...base, lastPostedAt: last });
     expect(res).toMatchObject({ allowed: false, reason: 'too_soon' });
-    if (!res.allowed) expect(res.retryAfter?.getTime()).toBe(last.getTime() + 6 * 60_000);
+    if (!res.allowed) expect(res.retryAfter?.getTime()).toBe(last.getTime() + 10 * 60_000);
   });
 
   it('tanlangan tasodifiy tanaffus ishlatiladi', () => {
@@ -80,8 +80,8 @@ describe('randomGapMs', () => {
     }
   });
 
-  it("standart sozlama: qat'iy 6 daqiqa, kuniga 30 ta", () => {
-    expect(randomGapMs(DEFAULT_GUARD)).toBe(6 * 60_000);
+  it("standart sozlama: qat'iy 10 daqiqa, kuniga 30 ta", () => {
+    expect(randomGapMs(DEFAULT_GUARD)).toBe(10 * 60_000);
     expect(DEFAULT_GUARD.dailyLimit).toBe(30);
   });
 });

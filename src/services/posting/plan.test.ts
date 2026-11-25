@@ -199,3 +199,31 @@ describe('decideAction (ishchi qarori)', () => {
     expect(decideAction({ ...base, hasPending: false })).toBe('idle');
   });
 });
+
+describe('decideAction: tasdiq so`rovi oldinroq, joylash keyin', () => {
+  const ok = { allowed: true } as const;
+  const tooSoon = { allowed: false, reason: 'too_soon' } as const;
+  const base = {
+    guard: tooSoon,
+    askGuard: ok,
+    hasRunning: false,
+    hasConfirmed: false,
+    hasAsked: false,
+    hasPending: true,
+    now: 1_000,
+    askNotBefore: null,
+  };
+
+  it("joylash hali mumkin emas, lekin tasdiq so'rash mumkin bo'lsa so'raydi", () => {
+    expect(decideAction(base)).toBe('ask');
+  });
+
+  it("tasdiqlangan e'lon tanaffus tugamaguncha joylanmaydi", () => {
+    expect(decideAction({ ...base, hasConfirmed: true })).toBe('idle');
+    expect(decideAction({ ...base, hasConfirmed: true, guard: ok })).toBe('post');
+  });
+
+  it("so'rash ham mumkin bo'lmasa kutadi", () => {
+    expect(decideAction({ ...base, askGuard: tooSoon })).toBe('idle');
+  });
+});
