@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import { describe, expect, it } from 'vitest';
 import { parseXlsx } from './parse.js';
+import { buildCatalogTemplate } from './template.js';
 
 const HEADER = [
   '№',
@@ -111,5 +112,16 @@ describe("katalog Excel (ko'p varaqli)", () => {
     expect(errors).toEqual([]);
     expect(rows).toHaveLength(2);
     expect(rows[0]).not.toHaveProperty('code');
+  });
+});
+
+describe('katalog namuna fayli (/template)', () => {
+  it("o'zi o'qiladi: 3 ta namuna mahsulot, xatosiz, yo'riqnoma varag'i o'tkazib yuboriladi", async () => {
+    const { rows, errors } = await parseXlsx(await buildCatalogTemplate());
+    expect(errors).toEqual([]);
+    expect(rows.map((r) => r.code)).toEqual(['NAMUNA-1', 'NAMUNA-2', 'NAMUNA-3']);
+    expect(rows.map((r) => r.category)).toEqual(['Noutbuk i5', 'Noutbuk i5', 'Monitor 27"']);
+    expect(rows[0]).toMatchObject({ price: 7060000, currency: "so'm" });
+    expect(rows[0]!.description).toContain('Xususiyatlari:\nEkran: 15.6" Full HD');
   });
 });

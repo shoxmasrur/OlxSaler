@@ -7,6 +7,7 @@ import { findImagesForProduct, type FindResult } from '../../services/images/fin
 
 const DEFAULT_COUNT = 3;
 const MAX_COUNT = 10;
+const MAX_TRIES = 2;
 
 type Outcome =
   { id: number; model: string; result: FindResult } | { id: number; model: string; error: string };
@@ -20,11 +21,29 @@ export function registerImageCommand(bot: Bot) {
       MAX_COUNT,
     );
 
+    // Rasm 2 marta topilmagan mahsulot navbatni to'smasin va Brave kreditini yemasin.
+    const failed = await prisma.eventLog.groupBy({
+      by: ['entityId'],
+      where: { type: 'IMAGES_NOT_FOUND', entityType: 'Product' },
+      _count: { _all: true },
+    });
+    const giveUp = failed
+      .filter((f) => f.entityId !== null && f._count._all >= MAX_TRIES)
+      .map((f) => f.entityId as number);
+
     const products = await prisma.product.findMany({
-      where: { status: 'IMPORTED' },
+      where: { status: 'IMPORTED', id: { notIn: giveUp } },
       orderBy: { id: 'asc' },
       take: count,
     });
+    const skipped = await prisma.product.count({
+      where: { status: 'IMPORTED', id: { in: giveUp } },
+    });
+    if (skipped > 0) {
+      await ctx.reply(
+        `${skipped} ta mahsulot uchun rasm ${MAX_TRIES} marta topilmadi, ular o'tkazib yuboriladi (rasmni o'zingiz qo'shishingiz kerak).`,
+      );
+    }
     if (products.length === 0) {
       return void (await ctx.reply("Rasm qidiriladigan mahsulot yo'q (hammasi qayta ishlangan)."));
     }
