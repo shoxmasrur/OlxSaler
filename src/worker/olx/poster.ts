@@ -266,6 +266,39 @@ async function fillForm(page: Page, plan: PostPlan): Promise<void> {
   await selectCombo(page, /Марка/, (o) => pickOption(o, plan.brand), 'Марка');
 }
 
+/**
+ * "Рекламировать объявление" sahifasi: "Не рекламировать" va tasdiq oynasida "Да, создать" (reklamasiz).
+ * Pullik "Добавить рекламу" tugmasiga HECH QACHON tegilmaydi. Cookie paneli tugmalarni yopib turadi.
+ */
+async function declinePromotion(page: Page): Promise<void> {
+  const cookie = page.getByRole('button', { name: 'Закрыть' });
+  if (
+    await cookie
+      .first()
+      .isVisible()
+      .catch(() => false)
+  )
+    await cookie.first().click();
+  await human();
+  await humanClick(page.getByRole('button', { name: 'Не рекламировать' }));
+  await human();
+  await humanClick(page.getByRole('button', { name: 'Да, создать' }));
+  const done = await page
+    .waitForURL((u) => u.pathname.startsWith('/purchase/confirmation'), { timeout: 30_000 })
+    .then(
+      () => true,
+      () => false,
+    );
+  if (!done) {
+    throw new PostError(
+      'form_error',
+      'Reklama taklifidan reklamasiz chiqib bo`lmadi',
+      await screenshot(page, 'promo'),
+    );
+  }
+  await sleep(between(1_500, 3_000));
+}
+
 /** Sahifadagi e'lon havolasi va ID si (agar topilsa). */
 async function findAd(
   page: Page,
@@ -346,6 +379,10 @@ export async function postListing(plan: PostPlan, opts: { dryRun: boolean }): Pr
       );
     }
     await sleep(between(2_000, 4_000));
+    // OLX e'lon yaratilgach pullik reklama taklif qiladi: e'lon allaqachon yaratilgan (URL'da ad-id),
+    // biz faqat reklamasiz davom etamiz va hech qachon to'lamaymiz.
+    const adIdFromUrl = /[?&]ad-id=(\d+)/.exec(page.url())?.[1] ?? null;
+    if (page.url().includes('/purchase/activate/promote/')) await declinePromotion(page);
     await ensureNoBlock(page, 'Joylashdan keyin');
     const after = await page.locator('body').innerText();
     if (/оплатить|купить пакет|лимит бесплатн/i.test(after)) {
@@ -355,7 +392,9 @@ export async function postListing(plan: PostPlan, opts: { dryRun: boolean }): Pr
         await screenshot(page, `${plan.productId}-payment`),
       );
     }
-    const { url, adId } = await findAd(page, plan.title);
+    const found = adIdFromUrl ? null : await findAd(page, plan.title);
+    const adId = adIdFromUrl ?? found?.adId ?? null;
+    const url = adIdFromUrl ? `https://www.olx.uz/d/${adIdFromUrl}/` : (found?.url ?? null);
     return {
       url: url ?? page.url(),
       adId,

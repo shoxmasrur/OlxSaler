@@ -1,4 +1,5 @@
 import dns from 'node:dns';
+import net from 'node:net';
 import { InputFile } from 'grammy';
 import { env } from '../config/env.js';
 import { prisma } from '../db/client.js';
@@ -25,6 +26,8 @@ import { createApi, notify, sendConfirmation } from './telegram.js';
 
 // Ba'zi tarmoqlarda IPv6 ishlamaydi: Telegram va OLX uchun IPv4 afzal.
 dns.setDefaultResultOrder('ipv4first');
+// IPv4/IPv6 "happy eyeballs" bu tarmoqda Telegram'ga ulanishni uzib qo'yadi (ETIMEDOUT): o'chiriladi.
+net.setDefaultAutoSelectFamily(false);
 
 const api = createApi(env.BOT_TOKEN);
 const owner = env.OWNER_TELEGRAM_ID;

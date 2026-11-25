@@ -62,6 +62,16 @@ Ro'yxatlari hali yig'ilmagan (keyingi kuzatuv). Taxmin: "Другая марка
 - **Qoralama oynasi**: kategoriya tanlangan, lekin e'lon joylanmagan bo'lsa, OLX saqlab qo'yadi va `/adding/` ga qaytganda "У вас есть незаконченное объявление" oynasi chiqadi. Bot har safar **`Нет, начать заново`** ni bosishi kerak.
 - Formadan boshqa sahifaga o'tishda "Leave site?" dialogi chiqishi mumkin (saqlanmagan o'zgarish).
 
+## «Опубликовать» dan keyingi oqim (pilot #6, 2026-11-25, haqiqiy joylash)
+1. «Опубликовать» bosiladi → e'lon **yaratiladi** (URL'da `ad-id=...`) va OLX `/purchase/activate/promote/` sahifasini ochadi: **pullik reklama taklifi** («Быстрая продажа» 96 700 so'm oldindan belgilangan).
+2. Pastdagi sticky panelda ikki tugma: `Не рекламировать` va `Добавить рекламу (...)`. **Faqat `Не рекламировать` bosiladi.** Cookie paneli bu tugmalarni yopib turadi: avval cookie `Закрыть`.
+3. Tasdiq oynasi «Создать объявление без рекламы?»: `Да, создать`.
+4. `/purchase/confirmation/` sahifasi: «Количество доступных объявлений будет уменьшено» (paketdan 1 ta sarflandi, to'lov yo'q).
+5. E'lon `Активные` ro'yxatida paydo bo'ladi, havola: `https://www.olx.uz/d/<ad-id>/`.
+- Tugallanmagan forma qoralamasi saqlanadi: `/adding/` ochilganda «У вас есть незаконченное объявление» → `Нет, начать заново`.
+- OLX foto maydonida «настоящие фото, не из интернета» deb ogohlantiradi (moderatsiya natijasi hali kuzatilmoqda).
+- Eslatma: `Мой бизнес` bo'limida **PRO `Импорт объявлений` / `Экспорт объявлений`** bor: OLX'ning o'zining ommaviy yuklash vositasi (keyin o'rganish kerak, qoidalarga mos ommaviy yo'l bo'lishi mumkin).
+
 ## Hisob turi va limitlar (2026-11-25, brauzerda tekshirildi)
 - Hisob **oddiy (biznes emas)**: foydalanuvchi `gulshox1998`, paket yo'q, balans 0 so'm / 0 bonus.
 - **Bepul e'lon limiti**: `Электроника / Компьютеры` da qoldiq **0**, keyingi bepul e'longacha 29 kun (minimal davr 30 kun). Hisobda 2 ta faol (Gigabyte monitorlar, 24-noyabr), 1 ta `Неоплаченные`, 1 ta `Неактивные` e'lon bor. Ya'ni bepul yo'l bilan oyiga taxminan 1-2 ta e'lon.
