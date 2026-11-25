@@ -9,6 +9,15 @@ export function draftKeyboard(productId: number): InlineKeyboard {
     .text("⏭ O'tkazib yubor", `skip:${productId}`);
 }
 
+/** Joylash oldidan yakuniy tasdiq: faqat "Joylash" bosilgandan keyin OLX'ga qo'yiladi. */
+export function confirmKeyboard(productId: number): InlineKeyboard {
+  return new InlineKeyboard()
+    .text('✅ Joylash', `post:${productId}`)
+    .text('⏳ Keyinroq', `defer:${productId}`)
+    .row()
+    .text('✖️ Bekor qilish', `cancel:${productId}`);
+}
+
 /** Callback data formati: harakat:mahsulotId (masalan approve:42). */
 export function parseCallback(data: string): { action: string; productId: number } | null {
   const m = /^([a-z_]+):(\d+)$/.exec(data);

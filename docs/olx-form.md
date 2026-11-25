@@ -62,6 +62,13 @@ Ro'yxatlari hali yig'ilmagan (keyingi kuzatuv). Taxmin: "Другая марка
 - **Qoralama oynasi**: kategoriya tanlangan, lekin e'lon joylanmagan bo'lsa, OLX saqlab qo'yadi va `/adding/` ga qaytganda "У вас есть незаконченное объявление" oynasi chiqadi. Bot har safar **`Нет, начать заново`** ni bosishi kerak.
 - Formadan boshqa sahifaga o'tishda "Leave site?" dialogi chiqishi mumkin (saqlanmagan o'zgarish).
 
+## Hisob turi va limitlar (2026-11-25, brauzerda tekshirildi)
+- Hisob **oddiy (biznes emas)**: foydalanuvchi `gulshox1998`, paket yo'q, balans 0 so'm / 0 bonus.
+- **Bepul e'lon limiti**: `Электроника / Компьютеры` da qoldiq **0**, keyingi bepul e'longacha 29 kun (minimal davr 30 kun). Hisobda 2 ta faol (Gigabyte monitorlar, 24-noyabr), 1 ta `Неоплаченные`, 1 ta `Неактивные` e'lon bor. Ya'ni bepul yo'l bilan oyiga taxminan 1-2 ta e'lon.
+- **Paketlar** (`Компьютеры`, hammasi 30 kunlik): `Старт` 5 e'lon = 30 900 so'm; `Премиум` 10 e'lon = 61 100 so'm; `Мега` 50 e'lon = 300 000 so'm (bitta e'lon ~6 000-6 180 so'm). Paketga `Бизнес-страница` kiradi.
+- OLX.uz'da yetkazib berish xizmati yo'q (OLX o'zi ogohlantiradi): e'londa "yetkazib berish" yozilmaydi.
+- Eslatma: hisobdagi 2 ta faol Gigabyte monitor katalogdagi mahsulotlar bilan bir xil bo'lishi mumkin: joylashdan oldin takrorlanishni tekshirish kerak.
+
 ## Ochiq savollar
-1. **Bepul e'lon limiti**: OLX har kategoriyada bepul e'lonlar sonini cheklashi mumkin ("Платные услуги"). Birinchi test e'londan keyin ko'rinadi.
+1. **Bepul e'lon limiti** (yuqorida aniqlandi: bepul qoldiq 0): OLX har kategoriyada bepul e'lonlar sonini cheklashi mumkin ("Платные услуги"). Birinchi test e'londan keyin ko'rinadi.
 2. Monitor va planshet **marka ro'yxatlari** (keyingi kuzatuv).

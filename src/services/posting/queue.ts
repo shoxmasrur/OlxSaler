@@ -1,10 +1,11 @@
 import { prisma } from '../../db/client.js';
+import { ACTIVE_JOB_STATUSES } from './jobs.js';
 
 export type QueueResult =
   | { ok: true; jobId: number }
   | { ok: false; reason: 'not_approved' | 'no_draft' | 'already_queued' };
 
-const ACTIVE = ['PENDING', 'RUNNING'];
+const ACTIVE = ACTIVE_JOB_STATUSES;
 
 /**
  * Egasi yakuniy tasdiqlagan e'lonni joylash navbatiga qo'yadi. Job mavjudligi "egasi tasdiqladi"

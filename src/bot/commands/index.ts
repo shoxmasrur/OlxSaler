@@ -1,6 +1,7 @@
 import type { Bot } from 'grammy';
 import { InputFile } from 'grammy';
 import { buildCatalogTemplate } from '../../services/priceList/template.js';
+import { registerControlCommands } from './control.js';
 import { registerDraftCommand } from './draft.js';
 import { registerImageCommand } from './images.js';
 import { registerReviewCommand } from './review.js';
@@ -13,10 +14,8 @@ export function registerCommands(bot: Bot) {
   bot.command('template', async (ctx) =>
     ctx.replyWithDocument(new InputFile(await buildCatalogTemplate(), 'katalog_namuna.xlsx')),
   );
-  bot.command('status', (ctx) => ctx.reply(soon));
   bot.command('list', (ctx) => ctx.reply(soon));
-  bot.command('pause', (ctx) => ctx.reply(soon));
-  bot.command('resume', (ctx) => ctx.reply(soon));
+  registerControlCommands(bot);
   registerImageCommand(bot);
   registerReviewCommand(bot);
   registerDraftCommand(bot);
@@ -32,7 +31,7 @@ export async function setupMenu(bot: Bot) {
     { command: 'draft', description: "E'lon qoralamasi va yakuniy tasdiq" },
     { command: 'status', description: 'Holat' },
     { command: 'list', description: "Oxirgi e'lonlar" },
-    { command: 'pause', description: "Workerni to'xtatish" },
-    { command: 'resume', description: 'Workerni davom ettirish' },
+    { command: 'pause', description: "Joylashni to'xtatish" },
+    { command: 'resume', description: 'Joylashni davom ettirish' },
   ]);
 }

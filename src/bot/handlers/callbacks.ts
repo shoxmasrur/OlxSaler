@@ -5,6 +5,7 @@ import { buildAltQuery, findImagesForProduct } from '../../services/images/find.
 import { applyReview } from '../../services/products/review.js';
 import { canReview, isReviewAction } from '../../services/products/transitions.js';
 import { createDraft } from '../../services/listings/draft.js';
+import { cancelJob, confirmJob, deferJob } from '../../services/posting/jobs.js';
 import { queueForPosting } from '../../services/posting/queue.js';
 import { draftKeyboard, parseCallback } from '../keyboards.js';
 import { formatPreview } from '../preview.js';
@@ -118,9 +119,36 @@ async function handleDraftAction(ctx: Context, action: 'queue' | 'rewrite', prod
   }
 }
 
+/** Joylash oldidan so'ralgan yakuniy tasdiq tugmalari (worker yuborgan xabar ostida). */
+async function handleJobAction(ctx: Context, action: 'post' | 'defer' | 'cancel', id: number) {
+  await ctx.answerCallbackQuery();
+  if (action === 'post') {
+    const ok = await confirmJob(id);
+    return void (await ctx.editMessageText(
+      ok
+        ? `✅ #${id} tasdiqlandi. Odamdek sur'atda, interval qoidalariga amal qilib joylanadi, natijani yozaman.`
+        : `#${id}: holati o'zgargan (allaqachon tasdiqlangan yoki bekor qilingan).`,
+    ));
+  }
+  if (action === 'defer') {
+    const ok = await deferJob(id);
+    return void (await ctx.editMessageText(
+      ok ? `⏳ #${id} keyinroqqa qoldirildi (navbatda qoladi).` : `#${id}: holati o'zgargan.`,
+    ));
+  }
+  const ok = await cancelJob(id);
+  await ctx.editMessageText(
+    ok ? `✖️ #${id} navbatdan olindi (joylanmaydi).` : `#${id}: holati o'zgargan.`,
+  );
+}
+
 export function registerCallbacks(bot: Bot) {
   bot.on('callback_query:data', async (ctx) => {
     const parsed = parseCallback(ctx.callbackQuery.data);
+    if (parsed && ['post', 'defer', 'cancel'].includes(parsed.action)) {
+      logger.info(parsed, 'Callback');
+      return handleJobAction(ctx, parsed.action as 'post' | 'defer' | 'cancel', parsed.productId);
+    }
     if (parsed && (parsed.action === 'queue' || parsed.action === 'rewrite')) {
       logger.info(parsed, 'Callback');
       return handleDraftAction(ctx, parsed.action, parsed.productId);

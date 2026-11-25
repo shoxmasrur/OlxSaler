@@ -2,6 +2,7 @@ import type { Bot } from 'grammy';
 import { prisma } from '../../db/client.js';
 import { logger } from '../../lib/logger.js';
 import { createDraft } from '../../services/listings/draft.js';
+import { ACTIVE_JOB_STATUSES } from '../../services/posting/jobs.js';
 import { draftKeyboard } from '../keyboards.js';
 import { formatPreview } from '../preview.js';
 
@@ -19,7 +20,7 @@ export function registerDraftCommand(bot: Bot) {
     );
 
     const products = await prisma.product.findMany({
-      where: { status: 'APPROVED', jobs: { none: { status: { in: ['PENDING', 'RUNNING'] } } } },
+      where: { status: 'APPROVED', jobs: { none: { status: { in: ACTIVE_JOB_STATUSES } } } },
       orderBy: { id: 'asc' },
       take: count,
       select: { id: true },

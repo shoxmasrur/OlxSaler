@@ -6,7 +6,9 @@
     "dev:bot": "tsx src/bot/index.ts",
     "dev:worker": "tsx src/worker/index.ts",
     "lint": "eslint .",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "olx:login": "tsx src/worker/login.ts",
+    "olx:dryrun": "tsx src/worker/dryrun.ts"
   },
   "repository": {
     "type": "git",
@@ -41,6 +43,7 @@
     "grammy": "^1.48.0",
     "p-limit": "^7.3.3",
     "pino": "^10.4.0",
+    "playwright-core": "^1.65.1",
     "prisma": "^7.10.1",
     "sharp": "^0.35.5",
     "zod": "^4.6.7"
