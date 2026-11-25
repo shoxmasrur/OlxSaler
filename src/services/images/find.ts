@@ -43,6 +43,24 @@ export function buildQuery(model: string): string {
   return model.replace(/["“”]/g, ' ').split(/\s+/).filter(Boolean).slice(0, 6).join(' ');
 }
 
+/**
+ * "Boshqasini top" uchun muqobil so'rov: har urinishda boshqa uzunlikdagi (3, 4, 5 so'z)
+ * boshlanish, shunda Brave boshqa natijalar beradi.
+ */
+export function buildAltQuery(model: string, attempt: number): string {
+  const words = model.replace(/["“”]/g, ' ').split(/\s+/).filter(Boolean);
+  return words.slice(0, 3 + (attempt % 3)).join(' ');
+}
+
+export interface FindOptions {
+  /** Muqobil so'rov (bo'lmasa, buildQuery). */
+  query?: string;
+  /** Oldin ko'rsatilgan rasm manzillari: qayta tanlanmaydi. */
+  exclude?: Set<string>;
+  /** Yangi rasm topilmasa, eski rasmlar va holat o'zgarmaydi. */
+  keepExisting?: boolean;
+}
+
 const isManufacturer = (source: string) =>
   MANUFACTURERS.some((d) => source === d || source.endsWith(`.${d}`));
 
@@ -54,10 +72,15 @@ export function rankCandidates(list: ImageCandidate[]): ImageCandidate[] {
   );
 }
 
-export async function findImagesForProduct(productId: number): Promise<FindResult> {
+export async function findImagesForProduct(
+  productId: number,
+  options: FindOptions = {},
+): Promise<FindResult> {
   const product = await prisma.product.findUniqueOrThrow({ where: { id: productId } });
-  const query = buildQuery(product.model);
-  const candidates = rankCandidates(await searchImages(query, 30));
+  const query = options.query ?? buildQuery(product.model);
+  const candidates = rankCandidates(await searchImages(query, 30)).filter(
+    (c) => !options.exclude?.has(c.url),
+  );
 
   const accepted: { url: string; data: Buffer; width: number; height: number }[] = [];
   const seen = new Set<string>();
@@ -87,6 +110,12 @@ export async function findImagesForProduct(productId: number): Promise<FindResul
     } catch (err) {
       reject(err instanceof RejectError ? err.message : "yuklab bo'lmadi");
     }
+  }
+
+  // "Boshqasini top" hech narsa topmasa, ilgari topilgan rasmlar o'z joyida qoladi.
+  if (accepted.length === 0 && options.keepExisting) {
+    await logEvent('IMAGES_RETRY_EMPTY', 'Product', productId, { query, tried, rejected });
+    return { productId, query, files: [], tried, rejected };
   }
 
   const dir = path.join(IMAGES_DIR, String(productId));

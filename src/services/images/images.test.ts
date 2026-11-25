@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 import { downloadImage, processImage, RejectError } from './download.js';
-import { buildQuery, rankCandidates } from './find.js';
+import { buildAltQuery, buildQuery, rankCandidates } from './find.js';
 
 const solid = (w: number, h: number, format: 'png' | 'jpeg' = 'png') => {
   const img = sharp({ create: { width: w, height: h, channels: 4, background: '#3366cc' } });
@@ -95,5 +95,20 @@ describe('downloadImage (SSRF himoyasi)', () => {
 
   it("noto'g'ri manzilni rad etadi", async () => {
     await expect(downloadImage('bu url emas')).rejects.toThrow("manzil noto'g'ri");
+  });
+});
+
+describe('buildAltQuery', () => {
+  const model = 'HP LAPTOP 15-FC0075NIA AMD R7 5825U 8GB 512GB';
+
+  it("har urinishda boshqa uzunlikdagi (3, 4, 5 so'z) so'rov beradi", () => {
+    expect(buildAltQuery(model, 0)).toBe('HP LAPTOP 15-FC0075NIA');
+    expect(buildAltQuery(model, 1)).toBe('HP LAPTOP 15-FC0075NIA AMD');
+    expect(buildAltQuery(model, 2)).toBe('HP LAPTOP 15-FC0075NIA AMD R7');
+    expect(buildAltQuery(model, 3)).toBe(buildAltQuery(model, 0));
+  });
+
+  it('qisqa modelda xato bermaydi', () => {
+    expect(buildAltQuery('Monitor 24', 2)).toBe('Monitor 24');
   });
 });

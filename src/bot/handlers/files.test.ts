@@ -4,7 +4,7 @@ vi.mock('../../config/env.js', () => ({ env: { BOT_TOKEN: 'test' } }));
 vi.mock('../../services/priceList/import.js', () => ({}));
 
 const { detectKind } = await import('./files.js');
-const { parseCallback } = await import('./callbacks.js');
+const { parseCallback } = await import('../keyboards.js');
 
 // Minimal haqiqiy PNG (1x1)
 const PNG = Buffer.from(

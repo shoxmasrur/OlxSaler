@@ -1,9 +1,9 @@
 import type { Bot } from 'grammy';
-import { InputFile, InputMediaBuilder } from 'grammy';
 import pLimit from 'p-limit';
 import { prisma } from '../../db/client.js';
 import { logger } from '../../lib/logger.js';
 import { findImagesForProduct, type FindResult } from '../../services/images/find.js';
+import { searchInfo, sendAlbum } from '../handlers/album.js';
 
 const DEFAULT_COUNT = 3;
 const MAX_COUNT = 10;
@@ -74,27 +74,21 @@ export function registerImageCommand(bot: Bot) {
         await ctx.reply(`${title}\nXato: ${o.error}`);
         continue;
       }
-      const { files, query, tried, rejected } = o.result;
-      if (files.length === 0) {
-        const why =
-          Object.entries(rejected)
-            .map(([k, n]) => `${k}: ${n}`)
-            .join(', ') || "natija yo'q";
-        await ctx.reply(`${title}\nRasm topilmadi (so'rov: "${query}"; ${why}).`);
+      // Rasm topilgan mahsulotga albom va tasdiqlash tugmalari yuboriladi.
+      const { files, query, tried } = o.result;
+      if (await sendAlbum(ctx.api, ctx.chat.id, o, files, searchInfo(query, files.length, tried))) {
+        ok++;
         continue;
       }
-      ok++;
-      const caption = `${title}\nSo'rov: "${query}" (${files.length} ta rasm, ${tried} ta urinish)`;
-      if (files.length === 1) {
-        await ctx.replyWithPhoto(new InputFile(files[0]!), { caption });
-      } else {
-        await ctx.replyWithMediaGroup(
-          files.map((f, i) =>
-            InputMediaBuilder.photo(new InputFile(f), i === 0 ? { caption } : undefined),
-          ),
-        );
-      }
+      const { rejected } = o.result;
+      const why =
+        Object.entries(rejected)
+          .map(([k, n]) => `${k}: ${n}`)
+          .join(', ') || "natija yo'q";
+      await ctx.reply(`${title}\nRasm topilmadi (so'rov: "${query}"; ${why}).`);
     }
-    await ctx.reply(`Tayyor: ${ok}/${products.length} ta mahsulotga rasm topildi.`);
+    await ctx.reply(
+      `Tayyor: ${ok}/${products.length} ta mahsulotga rasm topildi. Har albom ostidagi tugmalar bilan tasdiqlang.`,
+    );
   });
 }

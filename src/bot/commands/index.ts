@@ -1,7 +1,8 @@
 import type { Bot } from 'grammy';
-import { InlineKeyboard, InputFile } from 'grammy';
+import { InputFile } from 'grammy';
 import { buildCatalogTemplate } from '../../services/priceList/template.js';
 import { registerImageCommand } from './images.js';
+import { registerReviewCommand } from './review.js';
 
 const soon = 'Tez orada...';
 
@@ -16,13 +17,7 @@ export function registerCommands(bot: Bot) {
   bot.command('pause', (ctx) => ctx.reply(soon));
   bot.command('resume', (ctx) => ctx.reply(soon));
   registerImageCommand(bot);
-
-  // Qadam 3.4 sinovi uchun vaqtinchalik buyruq (6.5-qadamda preview bilan almashadi).
-  bot.command('buttons', (ctx) =>
-    ctx.reply("Tugmani sinab ko'ring:", {
-      reply_markup: new InlineKeyboard().text('Ha', 'approve:42').text("Yo'q", 'skip:42'),
-    }),
-  );
+  registerReviewCommand(bot);
 }
 
 export async function setupMenu(bot: Bot) {
@@ -31,6 +26,7 @@ export async function setupMenu(bot: Bot) {
     { command: 'help', description: 'Yordam' },
     { command: 'template', description: 'Namuna Excel shablon' },
     { command: 'images', description: 'Mahsulotlarga rasm topish' },
+    { command: 'review', description: 'Rasmlarni tasdiqlash' },
     { command: 'status', description: 'Holat' },
     { command: 'list', description: "Oxirgi e'lonlar" },
     { command: 'pause', description: "Workerni to'xtatish" },
