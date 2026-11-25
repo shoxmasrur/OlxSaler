@@ -1,6 +1,7 @@
 import type { Bot } from 'grammy';
 import { InputFile } from 'grammy';
 import { buildCatalogTemplate } from '../../services/priceList/template.js';
+import { registerDraftCommand } from './draft.js';
 import { registerImageCommand } from './images.js';
 import { registerReviewCommand } from './review.js';
 
@@ -18,6 +19,7 @@ export function registerCommands(bot: Bot) {
   bot.command('resume', (ctx) => ctx.reply(soon));
   registerImageCommand(bot);
   registerReviewCommand(bot);
+  registerDraftCommand(bot);
 }
 
 export async function setupMenu(bot: Bot) {
@@ -27,6 +29,7 @@ export async function setupMenu(bot: Bot) {
     { command: 'template', description: 'Namuna Excel shablon' },
     { command: 'images', description: 'Mahsulotlarga rasm topish' },
     { command: 'review', description: 'Rasmlarni tasdiqlash' },
+    { command: 'draft', description: "E'lon qoralamasi va yakuniy tasdiq" },
     { command: 'status', description: 'Holat' },
     { command: 'list', description: "Oxirgi e'lonlar" },
     { command: 'pause', description: "Workerni to'xtatish" },

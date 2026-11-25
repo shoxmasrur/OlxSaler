@@ -1,3 +1,4 @@
+import dns from 'node:dns';
 import { Bot, GrammyError } from 'grammy';
 import { env } from '../config/env.js';
 import { logger } from '../lib/logger.js';
@@ -5,6 +6,10 @@ import { whitelist } from './middleware/whitelist.js';
 import { registerCommands, setupMenu } from './commands/index.js';
 import { registerCallbacks } from './handlers/callbacks.js';
 import { registerFileHandlers } from './handlers/files.js';
+
+// Ba'zi tarmoqlarda IPv6 manzil ishlamaydi (ETIMEDOUT/ENETUNREACH): Telegram, Brave va
+// Anthropic ulanishlari uchun IPv4 afzal ko'riladi.
+dns.setDefaultResultOrder('ipv4first');
 
 const bot = new Bot(env.BOT_TOKEN);
 

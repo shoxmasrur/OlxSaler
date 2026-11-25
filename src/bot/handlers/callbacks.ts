@@ -4,7 +4,10 @@ import { logger } from '../../lib/logger.js';
 import { buildAltQuery, findImagesForProduct } from '../../services/images/find.js';
 import { applyReview } from '../../services/products/review.js';
 import { canReview, isReviewAction } from '../../services/products/transitions.js';
-import { parseCallback } from '../keyboards.js';
+import { createDraft } from '../../services/listings/draft.js';
+import { queueForPosting } from '../../services/posting/queue.js';
+import { draftKeyboard, parseCallback } from '../keyboards.js';
+import { formatPreview } from '../preview.js';
 import { searchInfo, sendAlbum } from './album.js';
 
 // Tugma ikki marta bosilsa, bir vaqtda ikkita qidiruv ketmasin.
@@ -61,9 +64,67 @@ async function handleRetry(ctx: Context, productId: number) {
   }
 }
 
+const QUEUE_REASONS = {
+  not_approved: 'rasmlari tasdiqlanmagan yoki mahsulot holati mos emas',
+  no_draft: "qoralama yo'q (/draft bilan yarating)",
+  already_queued: 'allaqachon navbatda',
+} as const;
+
+const rewriting = new Set<number>();
+
+async function handleDraftAction(ctx: Context, action: 'queue' | 'rewrite', productId: number) {
+  if (action === 'queue') {
+    await ctx.answerCallbackQuery();
+    const res = await queueForPosting(productId);
+    return void (await ctx.editMessageText(
+      res.ok
+        ? `🚀 #${productId} navbatga qo'shildi. Eslatma: joylash dasturi hali ulanmagan, hozircha e'lon joylanmaydi.`
+        : `#${productId}: navbatga qo'yib bo'lmadi, ${QUEUE_REASONS[res.reason]}.`,
+    ));
+  }
+
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { status: true },
+  });
+  if (product?.status !== 'APPROVED') {
+    return void (await ctx.answerCallbackQuery({ text: 'Bu mahsulot uchun endi mumkin emas' }));
+  }
+  if (rewriting.has(productId)) {
+    return void (await ctx.answerCallbackQuery({ text: 'Yozyapman, kuting...' }));
+  }
+  rewriting.add(productId);
+  await ctx.answerCallbackQuery({ text: 'Qayta yozyapman...' });
+  try {
+    const { listing, price, ai } = await createDraft(productId);
+    await ctx.editMessageText(
+      formatPreview({
+        productId,
+        title: listing.title,
+        description: listing.description,
+        olxCategory: listing.olxCategory,
+        price,
+        ai,
+      }),
+      { reply_markup: draftKeyboard(productId) },
+    );
+  } catch (err) {
+    logger.error({ err, productId }, 'Qayta yozishda xato');
+    await ctx.reply(
+      `#${productId}: qayta yozib bo'lmadi: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  } finally {
+    rewriting.delete(productId);
+  }
+}
+
 export function registerCallbacks(bot: Bot) {
   bot.on('callback_query:data', async (ctx) => {
     const parsed = parseCallback(ctx.callbackQuery.data);
+    if (parsed && (parsed.action === 'queue' || parsed.action === 'rewrite')) {
+      logger.info(parsed, 'Callback');
+      return handleDraftAction(ctx, parsed.action, parsed.productId);
+    }
     if (!parsed || !isReviewAction(parsed.action)) return void (await ctx.answerCallbackQuery());
     const { action, productId } = parsed;
     logger.info(parsed, 'Callback');

@@ -1,7 +1,8 @@
 import type { ProductStatus } from '@prisma/client';
 import { describe, expect, it } from 'vitest';
 import { canReview, isReviewAction, TARGET_STATUS } from '../services/products/transitions.js';
-import { parseCallback, reviewKeyboard } from './keyboards.js';
+import { draftKeyboard, parseCallback, reviewKeyboard } from './keyboards.js';
+import { formatPreview } from './preview.js';
 
 const ALL: ProductStatus[] = [
   'IMPORTED',
@@ -65,5 +66,57 @@ describe('tugmalar va callback formati', () => {
       return parsed?.action;
     });
     expect(actions).toEqual(['approve', 'retry', 'skip']);
+  });
+});
+
+describe('qoralama ko`rinishi va tugmalari', () => {
+  it('narx probel bilan, sarlavha uzunligi va kategoriya ko`rsatiladi', () => {
+    const text = formatPreview({
+      productId: 6,
+      title: 'HP Laptop 15-FC0075NIA',
+      description: 'Matn.',
+      olxCategory: 'Электроника / Компьютеры / Ноутбуки',
+      price: 8200000,
+      ai: true,
+    });
+    expect(text).toContain("Narx: 8 200 000 so'm");
+    expect(text).toContain('Sarlavha (22/70): HP Laptop 15-FC0075NIA');
+    expect(text).toContain('Электроника / Компьютеры / Ноутбуки');
+    expect(text).not.toContain('AI ishlatilmadi');
+  });
+
+  it('AI ishlatilmasa, shu haqida ogohlantiradi', () => {
+    const text = formatPreview({
+      productId: 1,
+      title: 'x'.repeat(20),
+      description: 'Matn.',
+      olxCategory: 'k',
+      price: 1,
+      ai: false,
+    });
+    expect(text).toContain('AI ishlatilmadi');
+  });
+
+  it('juda uzun matn Telegram limitidan (4096) oshmaydi', () => {
+    const text = formatPreview({
+      productId: 1,
+      title: 'x'.repeat(20),
+      description: 'a'.repeat(9000),
+      olxCategory: 'k',
+      price: 1,
+      ai: true,
+    });
+    expect(text.length).toBeLessThanOrEqual(4096);
+  });
+
+  it('draftKeyboard: queue / rewrite / skip callback formati to`g`ri', () => {
+    const data = draftKeyboard(9)
+      .inline_keyboard.flat()
+      .map((b) => parseCallback((b as { callback_data: string }).callback_data));
+    expect(data).toEqual([
+      { action: 'queue', productId: 9 },
+      { action: 'rewrite', productId: 9 },
+      { action: 'skip', productId: 9 },
+    ]);
   });
 });
