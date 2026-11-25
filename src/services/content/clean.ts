@@ -34,6 +34,25 @@ export function cleanDescription(text: string): string {
     .trim();
 }
 
+/**
+ * Boshqa e'londa aynan shu sarlavha bo'lsa (masalan, faqat rangi farq qiluvchi ikki model),
+ * OLX dublikat deb belgilamasligi uchun oxiriga rang qo'shiladi ("Rang: Ko'k" -> "... Ko'k").
+ * Sarlavha 70 belgidan oshmaydi: kerak bo'lsa, o'rtasidagi so'zlar emas, oxiri qisqartiriladi.
+ */
+export function disambiguateTitle(
+  title: string,
+  takenTitles: string[],
+  description: string,
+  maxLength = 70,
+): string {
+  const key = (s: string) => s.trim().toLowerCase();
+  if (!takenTitles.some((t) => key(t) === key(title))) return title;
+  const color = /Rang:\s*([^\n]+)/i.exec(description)?.[1]?.trim();
+  if (!color) return title;
+  const base = title.slice(0, Math.max(maxLength - color.length - 1, 16)).trim();
+  return `${base} ${color}`.slice(0, maxLength);
+}
+
 // Qisqartma va texnik belgilar katta harfda qoladi.
 const ACRONYMS = new Set([
   'AMD',

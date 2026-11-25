@@ -1,6 +1,6 @@
 import type { Listing } from '@prisma/client';
 import { prisma } from '../../db/client.js';
-import { cleanDescription, normalizeTitle } from '../content/clean.js';
+import { cleanDescription, disambiguateTitle, normalizeTitle } from '../content/clean.js';
 import { writeIntro } from '../content/describe.js';
 import { logEvent } from '../eventLog.js';
 import { olxCategoryFor } from '../olx/categories.js';
@@ -44,7 +44,16 @@ export async function createDraft(
   if (title.length < 16) throw new Error(`Sarlavha juda qisqa: "${title}"`);
   if (description.length < MIN_DESCRIPTION) throw new Error("Ta'rif juda qisqa (40 belgidan kam)");
 
-  const data = { title, description, olxCategory: category.path };
+  // Boshqa mahsulotning qoralamasida aynan shu sarlavha bo'lsa, rang qo'shiladi (dublikat bo'lmasin).
+  const taken = (
+    await prisma.listing.findMany({
+      where: { productId: { not: productId } },
+      select: { title: true },
+    })
+  ).map((l) => l.title);
+  const uniqueTitle = disambiguateTitle(title, taken, description);
+
+  const data = { title: uniqueTitle, description, olxCategory: category.path };
   const listing = await prisma.listing.upsert({
     where: { productId },
     create: { productId, ...data },

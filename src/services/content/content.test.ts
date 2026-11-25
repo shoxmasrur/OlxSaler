@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { olxCategoryFor } from '../olx/categories.js';
-import { CLAIM_PATTERN, cleanDescription, normalizeTitle } from './clean.js';
+import { CLAIM_PATTERN, cleanDescription, disambiguateTitle, normalizeTitle } from './clean.js';
 import { validateIntro } from './describe.js';
 
 describe('cleanDescription: kafolat, yetkazib berish va qutida yozilmaydi', () => {
@@ -118,5 +118,34 @@ describe('validateIntro: kesilgan matn', () => {
       "Bu noutbuk AMD Ryzen 7 5825U protsessori va 8 GB operativ xotira bilan ish, o'qish";
     expect(validateIntro(cut, source)).toBeNull();
     expect(validateIntro(`${cut} uchun mos.`, source)).not.toBeNull();
+  });
+});
+
+describe('disambiguateTitle (takroriy sarlavha)', () => {
+  const desc = "Xususiyatlari:\nRang: Ko'k";
+
+  it('boshqa e`londa bunday sarlavha bo`lmasa, o`zgartirmaydi', () => {
+    expect(disambiguateTitle('Asus Vivobook X1502V', ['Boshqa'], desc)).toBe(
+      'Asus Vivobook X1502V',
+    );
+  });
+
+  it("takroriy bo'lsa (registrdan qat'i nazar) rangni qo'shadi", () => {
+    expect(disambiguateTitle('Asus Vivobook X1502V', ['asus vivobook x1502v'], desc)).toBe(
+      "Asus Vivobook X1502V Ko'k",
+    );
+  });
+
+  it('70 belgidan oshmaydi va rang saqlanadi', () => {
+    const long = 'Asus Vivobook X1502V Intel Core I7-13620H 8GB DDR4 512GB 15.6 FHD';
+    const out = disambiguateTitle(long, [long], desc);
+    expect(out.length).toBeLessThanOrEqual(70);
+    expect(out.endsWith("Ko'k")).toBe(true);
+  });
+
+  it("rang ma'lum bo'lmasa, o'zgartirmaydi", () => {
+    expect(disambiguateTitle('Bir xil nom 12345', ['Bir xil nom 12345'], 'Rangsiz')).toBe(
+      'Bir xil nom 12345',
+    );
   });
 });
