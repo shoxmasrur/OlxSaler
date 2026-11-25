@@ -54,9 +54,14 @@ Ro'yxatlari hali yig'ilmagan (keyingi kuzatuv). Taxmin: "Другая марка
 - Rasm yuklash: yashirin `file-input` maydonlari (8 ta), `setInputFiles` ishlaydi deb kutiladi (sinab ko'rilmagan).
 - `Опубликовать` qaytarib bo'lmaydigan amal: faqat egasi tasdiqlagandan keyin, kunlik limit 5 ichida.
 
-## Ochiq savollar (egasidan)
-1. **Telefon raqami**: Номер телефона bo'sh. Qaysi raqam yoziladi? (Egasi o'zi profilda saqlashi yaxshi.)
-2. **Местоположение**: qaysi shahar/hudud?
-3. **Частное лицо yoki Бизнес?** 99 ta mahsulot sotiladi, "Бизнес" to'g'riroq bo'lishi mumkin (OLX qoidalari va to'lovlarga ta'sir qiladi).
-4. **Bepul e'lon limiti**: OLX har kategoriyada bepul e'lonlar sonini cheklashi mumkin ("Платные услуги"). Birinchi test e'londan keyin ko'rinadi.
-5. Monitor va planshet **marka ro'yxatlari** (keyingi kuzatuv).
+## Hal bo'lgan masalalar (2026-11-25)
+- **Telefon**: OLX profiliga saqlandi (`Sozlamalar → Profilni tahrirlash`). Endi formada `Номер телефона` avtomatik to'ladi.
+- **Местоположение**: profilda `Toshkent, Yunusobod tumani`, formada avtomatik `Ташкент, Юнусабадский район`.
+- **Контактное лицо** profildan to'ladi. Dastur bu uchta maydonga tegmaydi.
+- **Частное лицо / Бизнес**: egasi **Бизнес** ni tanladi. Har e'londa kategoriya maydonlari ichida `Бизнес` tugmasi bosiladi (`.env`: `OLX_SELLER_TYPE=business`).
+- **Qoralama oynasi**: kategoriya tanlangan, lekin e'lon joylanmagan bo'lsa, OLX saqlab qo'yadi va `/adding/` ga qaytganda "У вас есть незаконченное объявление" oynasi chiqadi. Bot har safar **`Нет, начать заново`** ni bosishi kerak.
+- Formadan boshqa sahifaga o'tishda "Leave site?" dialogi chiqishi mumkin (saqlanmagan o'zgarish).
+
+## Ochiq savollar
+1. **Bepul e'lon limiti**: OLX har kategoriyada bepul e'lonlar sonini cheklashi mumkin ("Платные услуги"). Birinchi test e'londan keyin ko'rinadi.
+2. Monitor va planshet **marka ro'yxatlari** (keyingi kuzatuv).
