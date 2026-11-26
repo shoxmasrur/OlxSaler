@@ -6,6 +6,9 @@ import { queueForPosting } from '../posting/queue.js';
 
 const IMAGES_DIR = path.resolve('storage/images');
 
+/** Setting kaliti: izohsiz kelgan rasmlar shu mahsulotga biriktiriladi (bot rasm so'raganda yoziladi). */
+export const PHOTO_TARGET_KEY = 'photo_target';
+
 /**
  * Rasm izohidan mahsulot raqamini oladi: "#62", "#62 oq rang" yoki faqat "62".
  * Raqam topilmasa null.

@@ -9,8 +9,10 @@ import { formatSummary, importPriceList } from '../../services/priceList/import.
 import {
   MediaGroupMemory,
   attachOwnerPhoto,
+  PHOTO_TARGET_KEY,
   parseProductTag,
 } from '../../services/images/ownerPhotos.js';
+import { getSetting } from '../../services/posting/jobs.js';
 
 const UPLOADS = path.resolve('storage/uploads');
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -31,9 +33,10 @@ async function save(dir: string, name: string, data: Buffer) {
 
 const PHOTO_HINT =
   "Rasm qabul qilindi, lekin mahsulotga bog'lanmadi. Bog'lash uchun izohga mahsulot raqamini " +
-  'yozing, masalan: #62 (albomda izoh birinchi rasmda bo\'lsa yetarli).';
+  "yozing, masalan: #62 (albomda izoh birinchi rasmda bo'lsa yetarli).";
 
 const groups = new MediaGroupMemory();
+const repliedGroups = new Set<string>();
 
 /**
  * Izohda "#62" bo'lsa (yoki albomning birinchi rasmida bo'lgan bo'lsa) rasmni o'sha mahsulotga
@@ -45,6 +48,11 @@ async function attachToProduct(ctx: Context, buf: Buffer): Promise<boolean> {
   let productId = parseProductTag(msg.caption);
   if (productId !== null && groupId) groups.remember(groupId, productId);
   if (productId === null && groupId) productId = groups.recall(groupId);
+  // Izoh bo'lmasa: bot oxirgi marta rasm so'ragan mahsulot (`photo_target` sozlamasi).
+  if (productId === null) {
+    const target = Number(await getSetting(PHOTO_TARGET_KEY));
+    if (Number.isInteger(target) && target > 0) productId = target;
+  }
   if (productId === null) return false;
 
   const res = await attachOwnerPhoto(productId, buf);
@@ -52,12 +60,19 @@ async function attachToProduct(ctx: Context, buf: Buffer): Promise<boolean> {
     await ctx.reply(`Rasm biriktirilmadi: ${res.error}.`);
     return true;
   }
+  // Albomda har rasmga emas, faqat birinchisiga javob beriladi.
+  if (groupId) {
+    if (repliedGroups.has(groupId)) return true;
+    repliedGroups.add(groupId);
+  }
   const queue = res.queued
-    ? ' Joylash navbatiga qo\'yildi (oldin tasdiq so\'raladi).'
+    ? " Joylash navbatiga qo'yildi (oldin tasdiq so'raladi)."
     : res.status === 'APPROVED'
       ? ' Navbatda bor.'
       : ` Holat: ${res.status} (qoralama kerak).`;
-  await ctx.reply(`#${res.productId}: rasm qo'shildi (haqiqiy rasmlar: ${res.ownerImages} ta).${queue}`);
+  await ctx.reply(
+    `#${res.productId}: rasm qo'shildi (haqiqiy rasmlar: ${res.ownerImages} ta).${queue}`,
+  );
   return true;
 }
 
