@@ -38,6 +38,13 @@ const api = createApi(env.BOT_TOKEN);
 const owner = env.OWNER_TELEGRAM_ID;
 const TICK_MS = 30_000;
 
+// Bir martalik istisno (egasi so'raganda): `POST_START_HOUR=8 npm run dev:worker`. Doimiy qoida guard.ts da.
+const startHourOverride = Number(process.env.POST_START_HOUR);
+const GUARD =
+  Number.isInteger(startHourOverride) && startHourOverride >= 0 && startHourOverride < 24
+    ? { ...DEFAULT_GUARD, startHour: startHourOverride }
+    : DEFAULT_GUARD;
+
 let stopping = false;
 const stop = () => {
   stopping = true;
@@ -129,24 +136,30 @@ async function tick() {
       hasJobIn(['ASKED']),
     ]);
   const now = new Date();
-  const guard = evaluateGuard({
-    now,
-    postedToday: stats.postedToday,
-    lastPostedAt: stats.lastPostedAt,
-    paused,
-    requiredGapMs: gap ? Number(gap) : undefined,
-  });
+  const guard = evaluateGuard(
+    {
+      now,
+      postedToday: stats.postedToday,
+      lastPostedAt: stats.lastPostedAt,
+      paused,
+      requiredGapMs: gap ? Number(gap) : undefined,
+    },
+    GUARD,
+  );
   // Tasdiq so'rovi biroz erta yuboriladi: to'ldirish vaqti kutishning bir qismi bo'ladi.
-  const askGuard = evaluateGuard({
-    now,
-    postedToday: stats.postedToday,
-    lastPostedAt: stats.lastPostedAt,
-    paused,
-    requiredGapMs: Math.max(
-      (gap ? Number(gap) : DEFAULT_GUARD.minGapMin * 60_000) - ASK_LEAD_MS,
-      0,
-    ),
-  });
+  const askGuard = evaluateGuard(
+    {
+      now,
+      postedToday: stats.postedToday,
+      lastPostedAt: stats.lastPostedAt,
+      paused,
+      requiredGapMs: Math.max(
+        (gap ? Number(gap) : DEFAULT_GUARD.minGapMin * 60_000) - ASK_LEAD_MS,
+        0,
+      ),
+    },
+    GUARD,
+  );
   const action = decideAction({
     guard,
     askGuard,
@@ -172,7 +185,9 @@ async function main() {
       `⚠️ Ishchi oldingi safar to'xtagan: ${stale.map((p) => `#${p}`).join(', ')}. E'lon joylanganmi yo'qmi noma'lum, OLX'da tekshiring. Joylash pauzada, tayyor bo'lsa /resume.`,
     );
   }
-  logger.info(`Worker ishga tushdi (har ${TICK_MS / 1000} soniyada tekshiradi)`);
+  logger.info(
+    `Worker ishga tushdi (har ${TICK_MS / 1000} soniyada tekshiradi, ${GUARD.startHour}:00-${GUARD.endHour}:00)`,
+  );
 
   while (!stopping) {
     try {
