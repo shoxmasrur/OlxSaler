@@ -56,6 +56,7 @@ Moslash: modelning birinchi so'zi (HP, ASUS, LENOVO, ACER, DELL...) shu ro'yxatg
 ### Мониторы (2026-11-26, #71–#72 joylandi)
 - OLX sarlavhadan «Мониторы» ni to'g'ri taklif qiladi. Maydonlar: Частный/Бизнес, Состояние, Марка монитора (majburiy emas).
 - Marka ro'yxati: Acer, AIWA, AOC, Apple, Artel, ASUS, BenQ, BQ, Corsair, DELL, Digma, Dough, Eizo, Element, Envision, ExeGate, Framework, Fujitsu-Siemens, Gigabyte, Ginzzu, Hanns.G, Hasee, Hisense, HKC, Honor, HP, Huawei, Hyundai, Iiyama, Innocn, Irbis, KTC, KOORUI, Krez, Lenovo, LG, MAG, Monoprice, MSI, NEC, Neovo, Onn, Panasonic, Philips, Prestigio, Proview, Razer, Redragon, Samsung, Sanc, Sceptre, Sharp, Skyworth, Sony, TCL, Titan Army, Topdevice, Topview, Toshiba, Viewsonic, Viotek, Xiaomi, **Другая марка** (Ziffler/Immer/Everel yo'q).
+- **Valyuta (2026-11-26 14:2x dan):** narx yonidagi «Выбрать» valyuta maydoni endi bo'sh keladi; «сум» tanlanmasa «Опубликовать» hech qanday xato ko'rsatmay jim turadi (tarmoqqa so'rov ketmaydi). Har doim «сум» radiosini tanlang.
 - Monoblok kategoriyasi tavsiya qilinmasa: Электроника → Компьютеры → Настольные → Моноблок.
 
 ## Texnik kuzatuvlar (Playwright uchun)

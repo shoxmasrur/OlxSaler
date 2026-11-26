@@ -15,13 +15,13 @@ export interface GuardConfig {
 }
 
 // Egasining qarori: kuniga 30 tagacha; ikki e'lon joylanishi orasida to'ldirish va kutish vaqti
-// birgalikda kamida 8 daqiqa (qat'iy; 2026-11-26 da 10 daqiqadan qisqartirildi).
+// birgalikda kamida 6 daqiqa (qat'iy; 2026-11-26 da 10 → 8 → 6 daqiqaga qisqartirildi, egasi qarori).
 export const DEFAULT_GUARD: GuardConfig = {
   dailyLimit: 30,
   startHour: 9,
   endHour: 20,
-  minGapMin: 8,
-  maxGapMin: 8,
+  minGapMin: 6,
+  maxGapMin: 6,
   timeZone: 'Asia/Tashkent',
 };
 
