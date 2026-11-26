@@ -44,8 +44,17 @@ Moslash: sarlavhadagi diagonal (`15,6`, `15.6`, `15.3`, `14`, `16`...) shu orali
 Acer, Apple, Asus, BenQ, Bliss, Chuwi, Compaq, Dell, DESTEN, Digma, eMachines, Fujitsu-Siemens, GigaByte, Hasee, Honor, HP, HTC, Huawei, IBM/ThinkPad, iRU, Jumper, Lenovo, LG, Machenike, Medion, Microsoft Surface, MSI, NEC, Packard Bell, Panasonic, Razer, RoverBook, Samsung, Schenker, Sony, Teclast, Thunderobot, Toshiba, VAIO, Wortmann, Xiaomi, XMG, **Другая марка**, AIWA.
 Moslash: modelning birinchi so'zi (HP, ASUS, LENOVO, ACER, DELL...) shu ro'yxatga; topilmasa (KEETAB va h.k.) → `Другая марка`.
 
-### Марка монитора / планшета
-Ro'yxatlari hali yig'ilmagan (keyingi kuzatuv). Taxmin: "Другая марка" varianti bor.
+### Планшетные компьютеры (2026-11-26, #57–#61 joylandi)
+- OLX sarlavhadan ko'pincha **«Ноутбуки» ni noto'g'ri taklif qiladi**: «Изменить» → Электроника → Компьютеры → Планшетные компьютеры qo'lda tanlanadi.
+- Qo'shimcha maydonlar: Частный/Бизнес, **Марка планшетного компьютера***, Состояние. Diagonal yo'q.
+- Marka ro'yxati: Acer, Alldocube, Amazon, Apple, Archos, Asus, BDF, Black Shark, BQ, Chuwi, Cube, Datawind, Dell, Digma, Dragon Touch, Getac, Google Pixel Tablet, Honor, HP, HTC, Huawei, iBall, iLife, Intex, Irbis, Jumper, Karbonn, Kobo, Lava, Lenovo, Medion, Micromax, Microsoft Surface, Nubia, Nvidia, Onda, OnePlus, Onyx Boox, Oppo, Oukitel, Panasonic, Pipo, Prestigio, Ramos, Realme, Remarkable, Samsung, Sony, TCL, Teclast, Toshiba, Vankyo, Vivo, Wiko, Xiaomi, Zebra, ZTE, Zync, **Другая**.
+
+### Моноблок (2026-11-26, #63 joylandi)
+- Kategoriya modalida «Моноблок (Электроника / Компьютеры / Настольные)» tavsiya sifatida chiqadi.
+- Qo'shimcha maydonlar faqat Частный/Бизнес va Состояние (marka yo'q).
+
+### Монитор
+Marka ro'yxati hali yig'ilmagan.
 
 ## Texnik kuzatuvlar (Playwright uchun)
 - Maydonlar `textbox`, `combobox` (ro'yxat ochilganda `listbox` > `option` > havola) va tugma (`button`) sifatida chiqadi; matn bo'yicha topish mumkin: `getByRole('button', { name: 'Новый' })`.
