@@ -35,6 +35,15 @@ describe('diagonalBucket / findDiagonal', () => {
     );
   });
 
+  it("sarlavha va xususiyatda yo'q bo'lsa, ta'rifdagi 'dyuymli' dan oladi", () => {
+    expect(
+      findDiagonal(
+        'Dell Alienware DA15260 Core 7-240H 16GB DDR5 512GB Rtx 4050 6GB',
+        '15.3 dyuymli WUXGA (1920x1200) ekran.\n\nXususiyatlari:\nEkran: WUXGA 1920x1200',
+      ),
+    ).toBe('15"-15,6"');
+  });
+
   it('RAM/disk hajmini ekran deb adashmaydi (16GB, 512GB)', () => {
     expect(findDiagonal('Laptop X1 16GB 512GB', '')).toBeNull();
   });

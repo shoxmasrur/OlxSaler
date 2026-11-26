@@ -49,7 +49,9 @@ export function findDiagonal(title: string, description: string): Diagonal | nul
   const fromTitle =
     /(?:^|\s)(\d{2}(?:[.,]\d)?)\s*(?:"|''|FHD|WUXGA|WQXGA|QHD|HD|OLED|IPS|2K|3K)/i.exec(title)?.[1];
   // Sarlavhadagi son aniqroq (15,6), xususiyatlardagi qisqartirilgan bo'lishi mumkin (15").
-  const inches = parseInches(fromTitle ?? fromSpecs ?? '');
+  // Oxirgi chora: ta'rif matnidagi "15.3 dyuymli" (sarlavha qisqartirilgan, xususiyatda faqat "WUXGA").
+  const fromText = /(\d{2}(?:[.,]\d)?)\s*dyuym/i.exec(description)?.[1];
+  const inches = parseInches(fromTitle ?? fromSpecs ?? fromText ?? '');
   return inches === null ? null : diagonalBucket(inches);
 }
 
