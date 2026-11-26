@@ -6,6 +6,11 @@ import { env } from '../../config/env.js';
 import { logger } from '../../lib/logger.js';
 import { parseCsvBuffer, parseXlsx } from '../../services/priceList/parse.js';
 import { formatSummary, importPriceList } from '../../services/priceList/import.js';
+import {
+  MediaGroupMemory,
+  attachOwnerPhoto,
+  parseProductTag,
+} from '../../services/images/ownerPhotos.js';
 
 const UPLOADS = path.resolve('storage/uploads');
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -22,6 +27,38 @@ async function save(dir: string, name: string, data: Buffer) {
   const target = path.join(dir, `${Date.now()}-${name}`);
   await writeFile(target, data);
   return target;
+}
+
+const PHOTO_HINT =
+  "Rasm qabul qilindi, lekin mahsulotga bog'lanmadi. Bog'lash uchun izohga mahsulot raqamini " +
+  'yozing, masalan: #62 (albomda izoh birinchi rasmda bo\'lsa yetarli).';
+
+const groups = new MediaGroupMemory();
+
+/**
+ * Izohda "#62" bo'lsa (yoki albomning birinchi rasmida bo'lgan bo'lsa) rasmni o'sha mahsulotga
+ * biriktiradi va javob beradi. Mahsulot raqami topilmasa false (rasm oddiy yuklama sifatida saqlanadi).
+ */
+async function attachToProduct(ctx: Context, buf: Buffer): Promise<boolean> {
+  const msg = ctx.message!;
+  const groupId = msg.media_group_id;
+  let productId = parseProductTag(msg.caption);
+  if (productId !== null && groupId) groups.remember(groupId, productId);
+  if (productId === null && groupId) productId = groups.recall(groupId);
+  if (productId === null) return false;
+
+  const res = await attachOwnerPhoto(productId, buf);
+  if (!res.ok) {
+    await ctx.reply(`Rasm biriktirilmadi: ${res.error}.`);
+    return true;
+  }
+  const queue = res.queued
+    ? ' Joylash navbatiga qo\'yildi (oldin tasdiq so\'raladi).'
+    : res.status === 'APPROVED'
+      ? ' Navbatda bor.'
+      : ` Holat: ${res.status} (qoralama kerak).`;
+  await ctx.reply(`#${res.productId}: rasm qo'shildi (haqiqiy rasmlar: ${res.ownerImages} ta).${queue}`);
+  return true;
 }
 
 // Fayl turi kengaytma bo'yicha emas, ichidagi baytlar bo'yicha tekshiriladi.
@@ -46,8 +83,9 @@ export function registerFileHandlers(bot: Bot) {
       const ext = path.extname(name).toLowerCase();
       const extOk = (kind === 'xlsx' && ext === '.xlsx') || (kind === 'csv' && ext === '.csv');
       if (kind === 'image') {
+        if (await attachToProduct(ctx, buf)) return;
         await save(path.join(UPLOADS, 'images'), name, buf);
-        return void (await ctx.reply('Rasm qabul qilindi.'));
+        return void (await ctx.reply(PHOTO_HINT));
       }
       if (!extOk) {
         return void (await ctx.reply(
@@ -73,8 +111,9 @@ export function registerFileHandlers(bot: Bot) {
       if ((await detectKind(buf)) !== 'image') {
         return void (await ctx.reply('Rasm rad etildi.'));
       }
+      if (await attachToProduct(ctx, buf)) return;
       await save(path.join(UPLOADS, 'images'), `${largest.file_unique_id}.jpg`, buf);
-      await ctx.reply('Rasm qabul qilindi.');
+      await ctx.reply(PHOTO_HINT);
     } catch (err) {
       logger.error({ err }, 'Rasm qabul qilishda xato');
       await ctx.reply('Rasmni qabul qilishda xato.');
