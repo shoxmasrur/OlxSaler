@@ -53,8 +53,10 @@ Moslash: modelning birinchi so'zi (HP, ASUS, LENOVO, ACER, DELL...) shu ro'yxatg
 - Kategoriya modalida «Моноблок (Электроника / Компьютеры / Настольные)» tavsiya sifatida chiqadi.
 - Qo'shimcha maydonlar faqat Частный/Бизнес va Состояние (marka yo'q).
 
-### Монитор
-Marka ro'yxati hali yig'ilmagan.
+### Мониторы (2026-11-26, #71–#72 joylandi)
+- OLX sarlavhadan «Мониторы» ni to'g'ri taklif qiladi. Maydonlar: Частный/Бизнес, Состояние, Марка монитора (majburiy emas).
+- Marka ro'yxati: Acer, AIWA, AOC, Apple, Artel, ASUS, BenQ, BQ, Corsair, DELL, Digma, Dough, Eizo, Element, Envision, ExeGate, Framework, Fujitsu-Siemens, Gigabyte, Ginzzu, Hanns.G, Hasee, Hisense, HKC, Honor, HP, Huawei, Hyundai, Iiyama, Innocn, Irbis, KTC, KOORUI, Krez, Lenovo, LG, MAG, Monoprice, MSI, NEC, Neovo, Onn, Panasonic, Philips, Prestigio, Proview, Razer, Redragon, Samsung, Sanc, Sceptre, Sharp, Skyworth, Sony, TCL, Titan Army, Topdevice, Topview, Toshiba, Viewsonic, Viotek, Xiaomi, **Другая марка** (Ziffler/Immer/Everel yo'q).
+- Monoblok kategoriyasi tavsiya qilinmasa: Электроника → Компьютеры → Настольные → Моноблок.
 
 ## Texnik kuzatuvlar (Playwright uchun)
 - Maydonlar `textbox`, `combobox` (ro'yxat ochilganda `listbox` > `option` > havola) va tugma (`button`) sifatida chiqadi; matn bo'yicha topish mumkin: `getByRole('button', { name: 'Новый' })`.
