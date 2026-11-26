@@ -101,6 +101,11 @@ describe('validateIntro (Claude matnini tekshirish)', () => {
     expect(validateIntro(`${good} Ajoyib!`, source)).toBeNull();
   });
 
+  it('lotin matnga aralashgan kirill so`z yoki harfni rad etadi', () => {
+    expect(validateIntro(good.replace('noutbuk', 'ноутбук'), source)).toBeNull();
+    expect(validateIntro(good.replace('jihozlangan', 'jihозlangan'), source)).toBeNull();
+  });
+
   it("manbada yo'q raqamni (to'qilgan xususiyat) rad etadi", () => {
     expect(validateIntro(good.replace('8 GB', '16 GB'), source)).toBeNull();
   });

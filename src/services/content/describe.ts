@@ -30,6 +30,8 @@ export function validateIntro(intro: string, source: string): string | null {
   if (text.length < 40 || text.length > 700) return null;
   if (!/[.)]$/.test(text)) return null; // jumla o'rtasida tugagan matn
   if (CLAIM_PATTERN.test(text)) return null;
+  // Model ba'zan lotin matnga kirill so'z yoki harf aralashtiradi ("ноутбуки", "jihозlangan").
+  if (/\p{Script=Cyrillic}/u.test(text)) return null;
   if (/(\+?998|https?:|www\.|@|t\.me|\d{9,}|!)/i.test(text)) return null;
   const numbers = text.match(/\d+(?:[.,]\d+)?/g) ?? [];
   if (numbers.some((n) => !source.includes(n))) return null;
@@ -74,7 +76,9 @@ export async function writeIntro(input: IntroInput): Promise<string | null> {
         // Kesilgan javob (max_tokens) e'longa tushmasligi kerak.
         if (data.stop_reason !== 'end_turn') return null;
         const text = data.content.find((c) => c.type === 'text')?.text ?? '';
-        return validateIntro(text, input.source);
+        // Yaroqsiz matn (kirill aralash, to'qilgan raqam...): yangi javob so'raladi.
+        const valid = validateIntro(text, input.source);
+        if (valid) return valid;
       }
     } catch {
       // tarmoq uzilishi: qayta uriniladi
