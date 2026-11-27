@@ -6,6 +6,7 @@ import { registerDraftCommand } from './draft.js';
 import { registerImageCommand } from './images.js';
 import { registerPrepareCommand } from './prepare.js';
 import { registerReviewCommand } from './review.js';
+import { registerStatsCommand } from './stats.js';
 
 const soon = 'Tez orada...';
 
@@ -21,6 +22,7 @@ export function registerCommands(bot: Bot) {
   registerReviewCommand(bot);
   registerDraftCommand(bot);
   registerPrepareCommand(bot);
+  registerStatsCommand(bot);
 }
 
 export async function setupMenu(bot: Bot) {
@@ -33,6 +35,7 @@ export async function setupMenu(bot: Bot) {
     { command: 'draft', description: "E'lon qoralamasi va yakuniy tasdiq" },
     { command: 'prepare', description: 'Mahsulotlarni navbatga tayyorlash' },
     { command: 'status', description: 'Holat' },
+    { command: 'stats', description: "E'lonlar statistikasi (ko'rishlar, chat)" },
     { command: 'list', description: "Oxirgi e'lonlar" },
     { command: 'pause', description: "Joylashni to'xtatish" },
     { command: 'resume', description: 'Joylashni davom ettirish' },

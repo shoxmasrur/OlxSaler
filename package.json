@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "test": "vitest run --passWithNoTests",
     "olx:login": "tsx src/worker/login.ts",
-    "olx:dryrun": "tsx src/worker/dryrun.ts"
+    "olx:dryrun": "tsx src/worker/dryrun.ts",
+    "stats:ingest": "tsx src/stats/ingestFile.ts"
   },
   "repository": {
     "type": "git",

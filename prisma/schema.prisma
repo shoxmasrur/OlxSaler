@@ -115,3 +115,31 @@ model EventLog {
 
   @@index([type])
 }
+
+/// OLX "Мои объявления" sahifasidan o'qilgan ko'rsatkichlar (har yig'ishda bitta qator).
+/// OLX qiymatlari jamlanma: soat/kun bo'yicha o'sish ketma-ket qaydlar farqidan hisoblanadi.
+model AdStat {
+  id        Int      @id @default(autoincrement())
+  adId      String
+  productId Int?
+  title     String
+  views     Int
+  observed  Int
+  phones    Int
+  messages  Int
+  takenAt   DateTime
+
+  @@index([adId, takenAt])
+  @@index([takenAt])
+}
+
+/// OLX chat ro'yxatidagi suhbat (xabar matni saqlanmaydi: faqat kim, qaysi e'lon, qachon).
+model ChatThread {
+  id          String   @id
+  userName    String
+  adTitle     String
+  lastLabel   String
+  unread      Boolean  @default(false)
+  firstSeenAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
